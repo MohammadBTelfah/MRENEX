@@ -27,5 +27,7 @@ router.put('/updateProfile', auth, upload.single('profileImage'), userController
 router.delete('/account', auth, userController.deleteAccount);
 // Get all users route (for admin)
 router.get('/users', auth, userController.getAllUsers);
+// Change password route
+router.post('/change-password', auth, userController.changePassword);
 
 module.exports = router;

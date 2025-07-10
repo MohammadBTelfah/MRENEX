@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
 
 
 // Register a new user
@@ -62,16 +64,9 @@ exports.login = async (req, res) => {
 };
 // Get user profile
 exports.getProfile = async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id).select('-password');
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        res.status(200).json(user);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
-}
+  const user = await User.findById(req.user).select('-password');
+  res.json(user);
+};
 // Update user profile
 exports.updateProfile = async (req, res) => {
     const { fullName, address, phone } = req.body;
@@ -115,6 +110,30 @@ exports.getAllUsers = async (req, res) => {
     try {
         const users = await User.find().select('-password');
         res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
+exports.changePassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check old password
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Old password is incorrect' });
+        }
+
+        // Hash new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedNewPassword;
+
+        await user.save();
+        res.status(200).json({ message: 'Password changed successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error });
     }
