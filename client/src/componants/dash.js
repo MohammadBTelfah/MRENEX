@@ -15,6 +15,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import LogoutIcon from '@mui/icons-material/Logout'; // Optional: icon for logout
 import Profile from './profile'; // Assuming you have a Profile component
+import ProductsCrud from './productsCrud'; // Assuming you have a productsCrud component
+import {Category} from './category'; // Assuming you have a category component
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -61,8 +63,17 @@ function DemoPageContent({ pathname, profileData }) {
           <Profile data={profileData} />
         </Box>
       )}
+      {pathname ==="/Product" && (
+        <Box sx={{ mb: 4 }}>
+          <ProductsCrud />
+        </Box>
+      )}
+      {pathname ==="/category" && (
+        <Box sx={{ mb: 4 }}>
+          <Category />
+        </Box>
+      )}
 
-      <Typography>Dashboard content for {pathname}</Typography>
     </Box>
   );
 }

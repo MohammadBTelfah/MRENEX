@@ -16,7 +16,7 @@ const upload = multer({ storage });
 // Create a new product
 router.post('/create', auth, upload.single('prodImage'), productController.createProduct);
 // Get all products
-router.get('/', productController.getAllProducts);
+router.get('/getallproducts', productController.getAllProducts);
 // Get a single product by ID
 router.get('/:id', productController.getProductById);
 // Update a product by ID
