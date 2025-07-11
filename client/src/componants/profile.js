@@ -1,10 +1,8 @@
-import { useState, } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@mui/material";
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
+import { Button, Box, Typography, Modal } from "@mui/material";
 import axios from "axios";
+
 const style = {
   position: 'absolute',
   top: '50%',
@@ -16,27 +14,46 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+
 export default function Profile(props) {
-    const navigate = useNavigate();
-    const { profileData } = props;
+  const navigate = useNavigate();
+const profileData = props.data;
+
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-    return (
 
-        <div>
-            {/*  section for profile image  */}
-            <img width={300} src={profileData.image ?? "https://img.freepik.com/premium-vector/avatar-profile-icon-flat-style-male-user-profile-vector-illustration-isolated-background-man-profile-sign-business-concept_157943-38764.jpg?semt=ais_hybrid&w=740"} alt="Profile" />
-            <h1>User Name: {profileData.username}</h1>
-            <h2>Email: {profileData.email}</h2>
-            <h2>Phone: {profileData.phone}</h2>
-            <h2>Address: {profileData.address}</h2>
-            {/* button to change pass  */}
-            <Button onClick={handleOpen}>Change pass </Button>
+  // تحقق من وجود البيانات قبل العرض
+  if (!profileData) {
+    return <Typography>Loading profile...</Typography>;
+  }
 
+  return (
+    <div>
+      {/* Profile Image */}
+      <img
+  width={300}
+  src={
+    profileData.profileImage
+      ? `http://127.0.0.1:5003/${profileData.profileImage.replace(/\\/g, '/')}`
+      : "https://img.freepik.com/premium-vector/avatar-profile-icon-flat-style-male-user-profile-vector-illustration-isolated-background-man-profile-sign-business-concept_157943-38764.jpg"
+  }
+  alt="Profile"
+/>
+
+
+      <h1>User Name: {profileData.username}</h1>
+      <h2>Email: {profileData.email}</h2>
+      <h2>Phone: {profileData.phone}</h2>
+      <h2>Address: {profileData.address}</h2>
+
+      {/* Button to open modal */}
+      <Button onClick={handleOpen}>Change Password</Button>
+
+      {/* Password Change Modal */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -45,43 +62,52 @@ export default function Profile(props) {
       >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Update Your password
+            Update Your Password
           </Typography>
-          <form onSubmit={ async(e)=>{
-            e.preventDefault();
-            try {
-                const respose = await axios.post("http://127.0.0.1:5003/api/users/change-password",{
-                        oldPassword,
-                        newPassword
-                },{
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const response = await axios.post(
+                  "http://127.0.0.1:5003/api/users/change-password",
+                  { oldPassword, newPassword },
+                  {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                console.log("Password changed successfully:", respose.data);
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                  }
+                );
+                console.log("Password changed successfully:", response.data);
                 alert("Password changed successfully");
                 handleClose();
-                
-            } catch (error) {
+              } catch (error) {
                 console.error("Error changing password:", error.message);
                 if (error.response && error.response.status === 400) {
-                    alert("Old password is incorrect");
+                  alert("Old password is incorrect");
                 } else {
-                    alert("An error occurred while changing the password");
+                  alert("An error occurred while changing the password");
                 }
-                
-            }
-          }}>
-            <input type="text" placeholder="Old Password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
+              }
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Old Password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+            />
             <br />
-            <input type="text" placeholder="New Password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+            <input
+              type="text"
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
             <br />
             <Button type="submit">Save</Button>
           </form>
-
-          
         </Box>
       </Modal>
-        </div>
-    );
+    </div>
+  );
 }
