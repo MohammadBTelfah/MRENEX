@@ -1,17 +1,9 @@
 import * as React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
-import Input from '@mui/material/Input';
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, Paper, TextField, Button, Select, MenuItem,
+  InputLabel, Input
+} from '@mui/material';
 import axios from 'axios';
 
 export default function ProductsCrud() {
@@ -29,10 +21,8 @@ export default function ProductsCrud() {
         const productsRes = await axios.get('http://127.0.0.1:5003/api/products/getallproducts');
         setRows(productsRes.data);
 
-const categoryRes = await axios.get('http://127.0.0.1:5003/api/categories');
-setApiCategory(categoryRes.data);
-
-
+        const categoryRes = await axios.get('http://127.0.0.1:5003/api/categories');
+        setApiCategory(categoryRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -42,6 +32,7 @@ setApiCategory(categoryRes.data);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const data = new FormData();
     data.append('prodName', name);
     data.append('prodDescription', description);
@@ -56,7 +47,7 @@ setApiCategory(categoryRes.data);
         }
       });
 
-      setRows([...rows, response.data]); // Assuming response contains full product
+      setRows([...rows, response.data]);
       setName('');
       setDescription('');
       setPrice('');
@@ -109,10 +100,11 @@ setApiCategory(categoryRes.data);
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
+
         <InputLabel id="category-label">Category</InputLabel>
         <Select
-          fullWidth
           labelId="category-label"
+          fullWidth
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
@@ -122,12 +114,14 @@ setApiCategory(categoryRes.data);
             </MenuItem>
           ))}
         </Select>
+
         <Input
           type="file"
           fullWidth
           onChange={(e) => setImage(e.target.files[0])}
           sx={{ mt: 2 }}
         />
+
         <Button variant="contained" color="primary" type="submit" sx={{ mt: 2 }}>
           Submit
         </Button>
@@ -150,7 +144,9 @@ setApiCategory(categoryRes.data);
               <TableCell>{row.prodName}</TableCell>
               <TableCell align="right">{row.prodDescription}</TableCell>
               <TableCell align="right">{row.prodPrice}</TableCell>
-              <TableCell align="right">{row.prodCategory?.name || 'N/A'}</TableCell>
+              <TableCell align="right">
+                {row.prodCategory?.name || row.prodCategory || 'N/A'}
+              </TableCell>
               <TableCell align="right">
                 <img
                   src={`http://127.0.0.1:5003/uploads/${row.prodImage}`}
