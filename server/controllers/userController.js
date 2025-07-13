@@ -72,43 +72,55 @@ exports.getProfile = async (req, res) => {
   res.json(user);
 };
 // Update user profile
+// Update user profile
 exports.updateProfile = async (req, res) => {
-    const { fullName, address, phone } = req.body;
-    const profileImage = req.file ? req.file.path : null;
+  const {
+    username,
+    email,
+    fullName,
+    address,
+    phone,
+    role,
+  } = req.body;
 
-    try {
-        const user = await User.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Update user fields
-        user.fullName = fullName || user.fullName;
-        user.address = address || user.address;
-        user.phone = phone || user.phone;
-        if (profileImage) {
-            user.profileImage = profileImage;
-        }
-
-        await user.save();
-        res.status(200).json({ message: 'Profile updated successfully', user });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    // Update fields only if provided
+    if (username) user.username = username;
+    if (email) user.email = email;
+    if (fullName) user.fullName = fullName;
+    if (address) user.address = address;
+    if (phone) user.phone = phone;
+    if (role) user.role = role;
+
+    // Update profile image if uploaded
+    if (req.file) {
+      user.profileImage = req.file.filename;
+    }
+
+    await user.save();
+    res.status(200).json({ message: 'Profile updated successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
 };
+
 // Delete user account
 
 exports.deleteAccount = async (req, res) => {
-    try {
-        const user = await User.findByIdAndDelete(req.user.id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        res.status(200).json({ message: 'Account deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
 };
+
 // Get all users (for admin)
 exports.getAllUsers = async (req, res) => {
     try {

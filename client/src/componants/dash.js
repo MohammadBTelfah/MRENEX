@@ -20,6 +20,7 @@ import {Category} from './category'; // Assuming you have a category component
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import CategoryIcon from '@mui/icons-material/Category';
+import UserCrud from './UserCrud';
 import { useState,useEffect } from 'react';
 
 import { AppProvider } from '@toolpad/core/AppProvider';
@@ -71,6 +72,11 @@ function DemoPageContent({ pathname, profileData }) {
       {pathname ==="/category" && (
         <Box sx={{ mb: 4 }}>
           <Category />
+        </Box>
+      )}
+      {pathname ==="/users" && (
+        <Box sx={{ mb: 4 }}>
+          <UserCrud />
         </Box>
       )}
 
@@ -193,6 +199,11 @@ function DashboardLayoutSlots(props) {
     segment: 'category',
     title: 'Category',
     icon: <CategoryIcon />,
+  },
+  {
+    segment: 'users',
+    title: 'Users',
+    icon: <AccountBoxIcon />,
   }
 
 ] : []),
