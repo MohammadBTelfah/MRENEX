@@ -146,7 +146,7 @@ export default function UserCrud() {
               <TableRow key={user._id}>
                 <TableCell>
 <img
-  src={`http://127.0.0.1:5003/${user.profileImage.replace(/^uploads[\\/]/, "uploads/")}`}
+  src={`http://127.0.0.1:5003/uploads/${user.profileImage}`}
   alt="Profile"
   style={{
     width: "50px",
@@ -156,6 +156,7 @@ export default function UserCrud() {
     backgroundColor: "#fff"
   }}
 />
+
 
 
                 </TableCell>
