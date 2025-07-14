@@ -48,20 +48,33 @@ exports.getProductById = async (req, res) => {
 // update a product by id
 exports.updateProduct = async (req, res) => {
   try {
-    const { prodName, prodImage, prodPrice, prodDescription, prodCategory } = req.body;
+    const { prodName, prodPrice, prodDescription, prodCategory } = req.body;
+
+    const updateData = {
+      prodName,
+      prodPrice,
+      prodDescription,
+      prodCategory,
+    };
+
+    // إذا فيه صورة جديدة مرفوعة، أضفها للتحديث
+    if (req.file) {
+      updateData.prodImage = req.file.filename;
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      { prodName, prodImage, prodPrice, prodDescription, prodCategory },
+      updateData,
       { new: true }
-    ).populate('prodCategory', 'name');
-    if (!updatedProduct) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    );
+
+    if (!updatedProduct) return res.status(404).json({ message: 'Product not found' });
     res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
-    } catch (error) {
+  } catch (error) {
     res.status(500).json({ message: 'Error updating product', error: error.message });
-    }
-}
+  }
+};
+
 // delete a product by id
 exports.deleteProduct = async (req, res) => {
   try {

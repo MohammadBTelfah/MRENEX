@@ -1,12 +1,24 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, TextField, Button, Select, MenuItem, InputLabel, Input
+  Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, TextField, Button, Select, MenuItem, InputLabel, Input, Modal, Typography
 } from '@mui/material';
 import axios from 'axios';
 
-export default function BasicTable() {
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: '#121212',
+  color: '#fff',
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 4,
+};
+
+export default function ProductManager() {
   const [rows, setRows] = React.useState([]);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -15,56 +27,103 @@ export default function BasicTable() {
   const [image, setImage] = React.useState(null);
   const [apiCategory, setApiCategory] = React.useState([]);
 
-  useEffect(() => {
+  const [open, setOpen] = React.useState(false);
+  const [editId, setEditId] = React.useState(null);
+
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5003/api/products/getallproducts');
-      setRows(response.data);
-
-      const categoryRes = await axios.get('http://127.0.0.1:5003/api/categories');
-      console.log("Fetched Categories:", categoryRes.data);  // <-- هنا
-      setApiCategory(categoryRes.data);
+      const resProducts = await axios.get('http://127.0.0.1:5003/api/products/getallproducts');
+      setRows(resProducts.data);
+      const resCategories = await axios.get('http://127.0.0.1:5003/api/categories');
+      setApiCategory(resCategories.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
-  fetchData();
-}, []);
 
+  React.useEffect(() => {
+    fetchData();
+  }, []);
+
+  const resetForm = () => {
+    setName('');
+    setDescription('');
+    setPrice('');
+    setCategory('');
+    setImage(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData();
+    data.append('prodName', name);
+    data.append('prodDescription', description);
+    data.append('prodPrice', price);
+    data.append('prodCategory', category);
+    data.append('prodImage', image);
+    try {
+      const response = await axios.post('http://127.0.0.1:5003/api/products/create', data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      setRows([...rows, response.data.product]);
+      resetForm();
+    } catch (error) {
+      console.error('Error creating product:', error);
+    }
+  };
+
+  const handleOpen = (row) => {
+    setEditId(row._id);
+    setName(row.prodName);
+    setDescription(row.prodDescription);
+    setPrice(row.prodPrice);
+    setCategory(row.prodCategory?._id || '');
+    setImage(null);
+    setOpen(true);
+  };
+
+  const handleUpdate = async () => {
+    const data = new FormData();
+    data.append('prodName', name);
+    data.append('prodDescription', description);
+    data.append('prodPrice', price);
+    data.append('prodCategory', category);
+    if (image) data.append('prodImage', image);
+
+    try {
+      await axios.put(`http://127.0.0.1:5003/api/products/${editId}`, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      fetchData();
+      handleClose();
+    } catch (error) {
+      console.error('Error updating product:', error);
+    }
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    resetForm();
+    setEditId(null);
+  };
+
+  const inputStyle = {
+    bgcolor: '#1e1e1e',
+    borderRadius: 1,
+    input: { color: 'white' },
+    label: { color: '#ccc' },
+  };
 
   return (
-    <TableContainer component={Paper}>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          const data = new FormData();
-          data.append('prodName', name);
-          data.append('prodDescription', description);
-          data.append('prodPrice', price);
-          data.append('prodCategory', category);
-          data.append('prodImage', image);
-          try {
-            const response = await axios.post(
-              'http://127.0.0.1:5003/api/products/create',
-              data,
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-              }
-            );
-            const newRow = response.data.product;
-            setRows([...rows, newRow]);
-          } catch (error) {
-            console.error('Error sending data to server:', error);
-          }
-          setName('');
-          setDescription('');
-          setPrice('');
-          setCategory('');
-          setImage(null);
-        }}
-      >
+    <Box sx={{ p: 4, bgcolor: '#101010', minHeight: '100vh', color: 'white' }}>
+      <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
+        Add New Product
+      </Typography>
+      <form onSubmit={handleSubmit}>
         <TextField
           label="Name"
           variant="outlined"
@@ -72,6 +131,7 @@ export default function BasicTable() {
           margin="normal"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          sx={inputStyle}
         />
         <TextField
           label="Description"
@@ -80,6 +140,7 @@ export default function BasicTable() {
           margin="normal"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          sx={inputStyle}
         />
         <TextField
           label="Price"
@@ -88,13 +149,14 @@ export default function BasicTable() {
           margin="normal"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+          sx={inputStyle}
         />
-        <InputLabel id="select-category-label">Category</InputLabel>
+        <InputLabel sx={{ mt: 2, mb: 1 }}>Category</InputLabel>
         <Select
-          labelId="select-category-label"
           fullWidth
           value={category}
           onChange={(e) => setCategory(e.target.value)}
+          sx={{ ...inputStyle, mb: 2 }}
         >
           {apiCategory.map((cat) => (
             <MenuItem key={cat._id} value={cat._id}>
@@ -107,65 +169,148 @@ export default function BasicTable() {
           accept="image/*"
           fullWidth
           onChange={(e) => setImage(e.target.files[0])}
+          sx={{
+            my: 2,
+            bgcolor: '#1e1e1e',
+            color: 'white',
+            borderRadius: 1,
+            p: 1,
+          }}
         />
-        <Button variant="contained" color="primary" type="submit">
-          Submit
+        <Button
+          variant="contained"
+          type="submit"
+          sx={{
+            bgcolor: '#4CAF50',
+            color: '#fff',
+            '&:hover': { bgcolor: '#43a047' },
+          }}
+        >
+          Add Product
         </Button>
       </form>
 
-      <Table sx={{ minWidth: 650 }} aria-label="products table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell align="right">Description</TableCell>
-            <TableCell align="right">Price</TableCell>
-            <TableCell align="right">Category</TableCell>
-            <TableCell align="right">Image</TableCell>
-            <TableCell align="right">Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row._id}>
-              <TableCell>{row.prodName}</TableCell>
-              <TableCell align="right">{row.prodDescription}</TableCell>
-              <TableCell align="right">{row.prodPrice}</TableCell>
-              <TableCell align="right">
-                {row.prodCategory?.name || 'N/A'}
-              </TableCell>
-              <TableCell align="right">
-                <img
-                  src={`http://127.0.0.1:5003/${row.prodImage}`}
-                  alt={row.prodName}
-                  style={{ width: '100px' }}
-                />
-              </TableCell>
-              <TableCell align="right">
-                <Button>Update</Button>
-                <Button
-                  onClick={async () => {
-                    if (
-                      window.confirm('Are you sure you want to delete this product?')
-                    ) {
-                      await axios.delete(
-                        `http://127.0.0.1:5003/api/products/${row._id}`,
-                        {
+      <Typography variant="h6" sx={{ mt: 5, mb: 2 }}>
+        Products Table
+      </Typography>
+      <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ color: 'white' }}>Name</TableCell>
+              <TableCell sx={{ color: 'white' }} align="right">Description</TableCell>
+              <TableCell sx={{ color: 'white' }} align="right">Price</TableCell>
+              <TableCell sx={{ color: 'white' }} align="right">Category</TableCell>
+              <TableCell sx={{ color: 'white' }} align="right">Image</TableCell>
+              <TableCell sx={{ color: 'white' }} align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow key={row._id}>
+                <TableCell sx={{ color: 'white' }}>{row.prodName}</TableCell>
+                <TableCell sx={{ color: 'white' }} align="right">{row.prodDescription}</TableCell>
+                <TableCell sx={{ color: 'white' }} align="right">{row.prodPrice}</TableCell>
+                <TableCell sx={{ color: 'white' }} align="right">{row.prodCategory?.name || 'N/A'}</TableCell>
+                <TableCell align="right">
+                  <img
+  src={`http://127.0.0.1:5003/uploads/${row.prodImage}`}
+  alt={row.prodName}
+  style={{ width: '100px' }}
+/>
+
+                </TableCell>
+                <TableCell align="right">
+                  <Button variant="outlined" color="info" onClick={() => handleOpen(row)} sx={{ mr: 1 }}>
+                    Update
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={async () => {
+                      if (window.confirm('Are you sure you want to delete this product?')) {
+                        await axios.delete(`http://127.0.0.1:5003/api/products/${row._id}`, {
                           headers: {
                             Authorization: `Bearer ${localStorage.getItem('token')}`,
                           },
-                        }
-                      );
-                      setRows(rows.filter((r) => r._id !== row._id));
-                    }
-                  }}
-                >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+                        });
+                        setRows(rows.filter((r) => r._id !== row._id));
+                      }
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Modal for Update */}
+      <Modal open={open} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          <Typography variant="h6" gutterBottom>Edit Product</Typography>
+          <TextField
+            label="Name"
+            fullWidth
+            margin="normal"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            sx={inputStyle}
+          />
+          <TextField
+            label="Description"
+            fullWidth
+            margin="normal"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            sx={inputStyle}
+          />
+          <TextField
+            label="Price"
+            fullWidth
+            margin="normal"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            sx={inputStyle}
+          />
+          <InputLabel sx={{ mt: 2, mb: 1 }}>Category</InputLabel>
+          <Select
+            fullWidth
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            sx={{ ...inputStyle, mb: 2 }}
+          >
+            {apiCategory.map((cat) => (
+              <MenuItem key={cat._id} value={cat._id}>
+                {cat.name}
+              </MenuItem>
+            ))}
+          </Select>
+          <Input
+            type="file"
+            accept="image/*"
+            fullWidth
+            sx={{
+              my: 2,
+              bgcolor: '#1e1e1e',
+              color: 'white',
+              borderRadius: 1,
+              p: 1,
+            }}
+            onChange={(e) => setImage(e.target.files[0])}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button variant="contained" color="primary" onClick={handleUpdate}>
+              Save
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={handleClose}>
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </Box>
   );
 }
