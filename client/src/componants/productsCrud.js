@@ -1,12 +1,12 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper, TextField, Button, Select, MenuItem,
-  InputLabel, Input
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, TextField, Button, Select, MenuItem, InputLabel, Input
 } from '@mui/material';
 import axios from 'axios';
 
-export default function ProductsCrud() {
+export default function BasicTable() {
   const [rows, setRows] = React.useState([]);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -15,67 +15,56 @@ export default function ProductsCrud() {
   const [image, setImage] = React.useState(null);
   const [apiCategory, setApiCategory] = React.useState([]);
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const productsRes = await axios.get('http://127.0.0.1:5003/api/products/getallproducts');
-        setRows(productsRes.data);
-
-        const categoryRes = await axios.get('http://127.0.0.1:5003/api/categories');
-        setApiCategory(categoryRes.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const data = new FormData();
-    data.append('prodName', name);
-    data.append('prodDescription', description);
-    data.append('prodPrice', price);
-    data.append('prodCategory', category);
-    data.append('prodImage', image);
-
+  useEffect(() => {
+  const fetchData = async () => {
     try {
-      const response = await axios.post('http://127.0.0.1:5003/api/products/create', data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await axios.get('http://127.0.0.1:5003/api/products/getallproducts');
+      setRows(response.data);
 
-      setRows([...rows, response.data]);
-      setName('');
-      setDescription('');
-      setPrice('');
-      setCategory('');
-      setImage(null);
+      const categoryRes = await axios.get('http://127.0.0.1:5003/api/categories');
+      console.log("Fetched Categories:", categoryRes.data);  // <-- هنا
+      setApiCategory(categoryRes.data);
     } catch (error) {
-      console.error('Error sending data to server:', error);
+      console.error('Error fetching data:', error);
     }
   };
+  fetchData();
+}, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        await axios.delete(`http://127.0.0.1:5003/api/products/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        setRows(rows.filter(r => r._id !== id));
-      } catch (error) {
-        console.error('Error deleting product:', error);
-      }
-    }
-  };
 
   return (
-    <TableContainer component={Paper} sx={{ p: 3 }}>
-      <form onSubmit={handleSubmit}>
+    <TableContainer component={Paper}>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const data = new FormData();
+          data.append('prodName', name);
+          data.append('prodDescription', description);
+          data.append('prodPrice', price);
+          data.append('prodCategory', category);
+          data.append('prodImage', image);
+          try {
+            const response = await axios.post(
+              'http://127.0.0.1:5003/api/products/create',
+              data,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+              }
+            );
+            const newRow = response.data.product;
+            setRows([...rows, newRow]);
+          } catch (error) {
+            console.error('Error sending data to server:', error);
+          }
+          setName('');
+          setDescription('');
+          setPrice('');
+          setCategory('');
+          setImage(null);
+        }}
+      >
         <TextField
           label="Name"
           variant="outlined"
@@ -100,10 +89,9 @@ export default function ProductsCrud() {
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
-
-        <InputLabel id="category-label">Category</InputLabel>
+        <InputLabel id="select-category-label">Category</InputLabel>
         <Select
-          labelId="category-label"
+          labelId="select-category-label"
           fullWidth
           value={category}
           onChange={(e) => setCategory(e.target.value)}
@@ -114,20 +102,18 @@ export default function ProductsCrud() {
             </MenuItem>
           ))}
         </Select>
-
         <Input
           type="file"
+          accept="image/*"
           fullWidth
           onChange={(e) => setImage(e.target.files[0])}
-          sx={{ mt: 2 }}
         />
-
-        <Button variant="contained" color="primary" type="submit" sx={{ mt: 2 }}>
+        <Button variant="contained" color="primary" type="submit">
           Submit
         </Button>
       </form>
 
-      <Table sx={{ mt: 4, minWidth: 650 }} aria-label="products table">
+      <Table sx={{ minWidth: 650 }} aria-label="products table">
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
@@ -145,17 +131,34 @@ export default function ProductsCrud() {
               <TableCell align="right">{row.prodDescription}</TableCell>
               <TableCell align="right">{row.prodPrice}</TableCell>
               <TableCell align="right">
-                {row.prodCategory?.name || row.prodCategory || 'N/A'}
+                {row.prodCategory?.name || 'N/A'}
               </TableCell>
               <TableCell align="right">
                 <img
-                  src={`http://127.0.0.1:5003/uploads/${row.prodImage}`}
+                  src={`http://127.0.0.1:5003/${row.prodImage}`}
                   alt={row.prodName}
-                  style={{ width: 100 }}
+                  style={{ width: '100px' }}
                 />
               </TableCell>
               <TableCell align="right">
-                <Button variant="outlined" color="error" onClick={() => handleDelete(row._id)}>
+                <Button>Update</Button>
+                <Button
+                  onClick={async () => {
+                    if (
+                      window.confirm('Are you sure you want to delete this product?')
+                    ) {
+                      await axios.delete(
+                        `http://127.0.0.1:5003/api/products/${row._id}`,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`,
+                          },
+                        }
+                      );
+                      setRows(rows.filter((r) => r._id !== row._id));
+                    }
+                  }}
+                >
                   Delete
                 </Button>
               </TableCell>
