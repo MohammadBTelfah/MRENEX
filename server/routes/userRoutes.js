@@ -30,4 +30,7 @@ router.get('/getallusers', auth, userController.getAllUsers);
 // Change password route
 router.post('/change-password', auth, userController.changePassword);
 
+router.put('/update-user/:id', auth, upload.single("profileImage"), userController.updateUserById);
+
+
 module.exports = router;

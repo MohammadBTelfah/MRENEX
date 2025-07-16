@@ -137,4 +137,20 @@ exports.changePassword = async (req, res) => {
         res.status(500).json({ message: 'Server error', error });
     }
 };
+exports.updateUserById = async (req, res) => {
+  try {
+    const profileImage = req.file ? req.file.path : null;
+    const { username, email, fullName, address, phone, role } = req.body;
 
+    const updateData = { username, email, fullName, address, phone, role };
+    if (profileImage) updateData.profileImage = profileImage;
+
+    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error updating user by ID:", error.message);
+    res.status(500).json({ message: "Server error", error });
+  }
+};

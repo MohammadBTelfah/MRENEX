@@ -106,15 +106,16 @@ export default function UserCrud() {
 
     try {
       await axios.put(
-        `http://127.0.0.1:5003/api/users/updateProfile/${selectedUser._id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+  `http://127.0.0.1:5003/api/users/update-user/${selectedUser._id}`,
+  formData,
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      "Content-Type": "multipart/form-data",
+    },
+  }
+);
+
       setOpenModal(false);
       fetchUsers();
     } catch (error) {
@@ -146,7 +147,7 @@ export default function UserCrud() {
               <TableRow key={user._id}>
                 <TableCell>
 <img
-  src={`http://127.0.0.1:5003/uploads/${user.profileImage}`}
+src={`http://127.0.0.1:5003/${user.profileImage}`}
   alt="Profile"
   style={{
     width: "50px",
