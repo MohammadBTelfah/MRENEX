@@ -214,10 +214,10 @@ export default function ProductManager() {
                 <TableCell sx={{ color: 'white' }} align="right">{row.prodCategory?.name || 'N/A'}</TableCell>
                 <TableCell align="right">
                   <img
-  src={`http://127.0.0.1:5003/uploads/${row.prodImage}`}
-  alt={row.prodName}
-  style={{ width: '100px' }}
-/>
+                   src={`http://127.0.0.1:5003/uploads/${row.prodImage}`}
+                           alt={row.prodName}
+                        style={{ width: '100px' }}
+                            />
 
                 </TableCell>
                 <TableCell align="right">

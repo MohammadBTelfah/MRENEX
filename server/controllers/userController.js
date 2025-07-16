@@ -74,40 +74,23 @@ exports.getProfile = async (req, res) => {
 // Update user profile
 // Update user profile
 exports.updateProfile = async (req, res) => {
-  const {
-    username,
-    email,
-    fullName,
-    address,
-    phone,
-    role,
-  } = req.body;
-
   try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    const profileImage = req.file ? req.file.path : null;
+    const { username, email, fullName, address, phone } = req.body;
 
-    // Update fields only if provided
-    if (username) user.username = username;
-    if (email) user.email = email;
-    if (fullName) user.fullName = fullName;
-    if (address) user.address = address;
-    if (phone) user.phone = phone;
-    if (role) user.role = role;
+    const updateData = { username, email, fullName, address, phone };
+    if (profileImage) updateData.profileImage = profileImage;
 
-    // Update profile image if uploaded
-    if (req.file) {
-      user.profileImage = req.file.filename;
-    }
+    const user = await User.findByIdAndUpdate(req.user, updateData, { new: true });
+    if (!user) return res.status(404).json({ msg: "User not found" });
 
-    await user.save();
-    res.status(200).json({ message: 'Profile updated successfully', user });
+    res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    console.error("Error updating profile", error.message);
+    res.status(500).json({ message: "Server error", error });
   }
 };
+
 
 // Delete user account
 

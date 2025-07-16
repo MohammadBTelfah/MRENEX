@@ -22,7 +22,7 @@ router.post('/login', userController.login);
 // Get user profile route
 router.get('/profile', auth, userController.getProfile);
 // Update user profile route
-router.put('/updateProfile/:id', upload.single('profileImage'), userController.updateProfile);
+router.put("/update-profile", auth, upload.single("profileImage"), userController.updateProfile);
 // Delete user account route
 router.delete('/delete/:id', auth, userController.deleteAccount);
 // Get all users route (for admin)
