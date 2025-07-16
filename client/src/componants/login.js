@@ -1,5 +1,5 @@
-import {useState,useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
   Box,
@@ -20,15 +20,22 @@ export default function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
- useEffect(() => {
-  if (localStorage.getItem('token')) {
-    navigate('/');
-  }
-}, [navigate]);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+
+    if (token) {
+      if (role === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
-    const {name, value} = e.target;
-    setFormData({...formData, [name]: value});
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -37,8 +44,19 @@ export default function Login() {
 
     try {
       const response = await axios.post('http://127.0.0.1:5003/api/users/login', formData);
-      localStorage.setItem('token', response.data.token); // أو أي اسم فيه JWT أو session ID
-      navigate('/');
+
+   const { token, role } = response.data;
+
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', role);
+
+      if (role === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/');
+      }
+
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     }
