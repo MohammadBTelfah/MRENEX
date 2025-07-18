@@ -7,8 +7,11 @@ const auth = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Decoded token:", decoded);
-    req.user = decoded.id;
-    req.role = decoded.role; // Store role in request for further use
+
+    req.user = {
+      id: decoded.id,
+      role: decoded.role
+    };
 
     next();
   } catch (err) {

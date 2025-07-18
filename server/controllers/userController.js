@@ -79,10 +79,9 @@ exports.login = async (req, res) => {
 };
 // Get user profile
 exports.getProfile = async (req, res) => {
-  const user = await User.findById(req.user).select('-password');
+const user = await User.findById(req.user.id).select('-password');
   res.json(user);
 };
-// Update user profile
 // Update user profile
 exports.updateProfile = async (req, res) => {
   try {
@@ -92,7 +91,8 @@ exports.updateProfile = async (req, res) => {
     const updateData = { username, email, fullName, address, phone };
     if (profileImage) updateData.profileImage = profileImage;
 
-    const user = await User.findByIdAndUpdate(req.user, updateData, { new: true });
+    const user = await User.findByIdAndUpdate(req.user.id, updateData, { new: true }); // ✅ التصحيح هنا
+
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     res.status(200).json(user);
@@ -125,29 +125,35 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 exports.changePassword = async (req, res) => {
-    const { oldPassword, newPassword } = req.body;
-    try {
-        const user = await User.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+  const { oldPassword, newPassword } = req.body;
 
-        // Check old password
-        const isMatch = await bcrypt.compare(oldPassword, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Old password is incorrect' });
-        }
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: 'Unauthorized: Missing user info' });
+  }
 
-        // Hash new password
-        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-        user.password = hashedNewPassword;
+  try {
+    const user = await User.findById(req.user.id); // ✅ التصحيح هنا
 
-        await user.save();
-        res.status(200).json({ message: 'Password changed successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Old password is incorrect' });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+
+    await user.save();
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
 };
+
+
 exports.updateUserById = async (req, res) => {
   try {
     const profileImage = req.file ? req.file.path : null;

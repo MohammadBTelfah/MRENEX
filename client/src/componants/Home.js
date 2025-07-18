@@ -231,9 +231,10 @@ export default function HomeApp() {
                       <Typography textAlign="center">{user.fullName}</Typography>
                     </MenuItem>
                    
-                    <MenuItem onClick={() => alert("اذهب إلى صفحة الحساب")}>
-                      <Typography textAlign="center">my Page</Typography>
+                    <MenuItem onClick={() => navigate("/profile")}>
+                    <Typography textAlign="center">My Profile</Typography>
                     </MenuItem>
+
                     <MenuItem onClick={handleLogout}>
                       <Typography textAlign="center" color="error"> Sign Out </Typography>
                     </MenuItem>

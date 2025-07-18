@@ -57,9 +57,9 @@ exports.updateProduct = async (req, res) => {
       prodCategory,
     };
 
-    // إذا فيه صورة جديدة مرفوعة، أضفها للتحديث
-    if (req.file) {
-      updateData.prodImage = req.file.filename;
+    // Handle image (if uploaded)
+    if (req.file && req.file.filename) {
+      updateData.prodImage = `uploads/${req.file.filename}`;
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -68,12 +68,23 @@ exports.updateProduct = async (req, res) => {
       { new: true }
     );
 
-    if (!updatedProduct) return res.status(404).json({ message: 'Product not found' });
-    res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
+    if (!updatedProduct) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json({
+      message: 'Product updated successfully',
+      product: updatedProduct,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating product', error: error.message });
+    console.error("Update product error:", error.message);
+    res.status(500).json({
+      message: 'Error updating product',
+      error: error.message,
+    });
   }
 };
+
 
 // delete a product by id
 exports.deleteProduct = async (req, res) => {
