@@ -26,13 +26,19 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
   boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
 }));
 
-export default function Navbar({ darkMode, toggleDarkMode, toggleCart, setCurrentSection }) {
+export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  const pages = ["Home", "About Us", "Products", "Contact Us"];
+  const pages = [
+  { name: "Home", path: "/" },
+  { name: "About Us", path: "/about" },
+{ name: "Products", path: "/products" },
+  { name: "Contact Us", path: "/contact" },
+];
+
 
   const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
   const handleCloseNavMenu = () => setAnchorElNav(null);
@@ -66,7 +72,7 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart, setCurren
       <StyledAppBar position="static">
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography variant="h6" noWrap sx={{ color: "#000000" }}>
+            <Typography variant="h6" noWrap sx={{ color: "#000000", cursor: "pointer" }} onClick={() => navigate("/")}>
               LOGO
             </Typography>
 
@@ -80,15 +86,15 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart, setCurren
             >
               {pages.map((page) => (
                 <Button
-                  key={page}
-                  onClick={() => setCurrentSection(page.toLowerCase())}
+                  key={page.name}
+                  onClick={() => navigate(page.path)}
                   sx={{
                     color: "#000000",
                     fontWeight: "500",
                     "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
                   }}
                 >
-                  {page}
+                  {page.name}
                 </Button>
               ))}
             </Box>
@@ -142,6 +148,7 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart, setCurren
                   </MenuItem>
                 )}
               </Menu>
+
               <Box sx={{ display: { xs: "flex", md: "none" } }}>
                 <IconButton size="large" onClick={handleOpenNavMenu} color="inherit">
                   <FiMenu />
@@ -155,13 +162,13 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart, setCurren
       <Menu anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={handleCloseNavMenu}>
         {pages.map((page) => (
           <MenuItem
-            key={page}
+            key={page.name}
             onClick={() => {
-              setCurrentSection(page.toLowerCase());
+              navigate(page.path);
               handleCloseNavMenu();
             }}
           >
-            <Typography textAlign="center">{page}</Typography>
+            <Typography textAlign="center">{page.name}</Typography>
           </MenuItem>
         ))}
       </Menu>

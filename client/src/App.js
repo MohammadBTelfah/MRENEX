@@ -5,6 +5,7 @@ import Login from './componants/login';
 import DashboardLayoutSlots from './componants/dash';
 import HomeApp from './componants/Home';
 import UserProfile from './componants/UserProfile';
+import ProductCard from './componants/Porduct';
 import MainLayout from './componants/MainLayout';
 
 function App() {
@@ -18,6 +19,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="/products" element={<ProductCard />} />
+
         </Route>
 
         {/* Dashboard without Navbar/Footer */}
