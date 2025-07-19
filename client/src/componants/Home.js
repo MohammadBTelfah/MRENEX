@@ -7,9 +7,8 @@ import {
   Grid,
   Card,
   CardContent,
-  TextField,
   Button,
-  Paper
+  
 } from "@mui/material";
 import { styled } from "@mui/system";
 
@@ -35,6 +34,7 @@ const ProductCard = styled(Card)({
   },
 });
 
+// Main component for the Home page
 export default function HomeApp() {
   const [products, setProducts] = useState([]);
 

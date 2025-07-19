@@ -23,5 +23,6 @@ router.get('/:id', productController.getProductById);
 router.put('/:id', auth, upload.single('prodImage'), productController.updateProduct);
 // Delete a product by ID
 router.delete('/:id', auth, productController.deleteProduct);
+// Get products by category
 // Export the router
 module.exports = router;

@@ -61,7 +61,8 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
         });
         setUser(res.data);
       } catch (err) {
-        console.error("فشل في جلب معلومات الحساب:", err.message);
+        console.error("Error fetching user profile", err);
+        setUser(null);
       }
     };
     fetchUser();
@@ -107,11 +108,11 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
                 checkedIcon={<FiMoon />}
               />
               <IconButton onClick={toggleCart}>
-                <Badge badgeContent={4} color="primary">
+                <Badge badgeContent={0} color="primary">
                   <FiShoppingCart />
                 </Badge>
               </IconButton>
-              <Tooltip title="الحساب">
+              <Tooltip title="Account">
                 <IconButton onClick={handleOpenUserMenu}>
                   <Avatar
                     alt={user?.fullName}
@@ -144,7 +145,7 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
                   </>
                 ) : (
                   <MenuItem disabled>
-                    <Typography>جاري تحميل الحساب...</Typography>
+                    <Typography textAlign="center">Sign In</Typography>
                   </MenuItem>
                 )}
               </Menu>
@@ -171,6 +172,7 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
             <Typography textAlign="center">{page.name}</Typography>
           </MenuItem>
         ))}
+
       </Menu>
     </>
   );

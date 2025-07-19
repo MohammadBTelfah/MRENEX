@@ -31,6 +31,6 @@ router.get('/getallusers', auth, userController.getAllUsers);
 router.post('/change-password', auth, userController.changePassword);
 
 router.put('/update-user/:id', auth, upload.single("profileImage"), userController.updateUserById);
-
+// 
 
 module.exports = router;
