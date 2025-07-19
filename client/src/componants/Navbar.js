@@ -33,12 +33,11 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
   const navigate = useNavigate();
 
   const pages = [
-  { name: "Home", path: "/" },
-  { name: "About Us", path: "/about" },
-{ name: "Products", path: "/products" },
-  { name: "Contact Us", path: "/contact" },
-];
-
+    { name: "Home", path: "/" },
+    { name: "About Us", path: "/about" },
+    { name: "Products", path: "/products" },
+    { name: "Contact Us", path: "/contact" },
+  ];
 
   const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
   const handleCloseNavMenu = () => setAnchorElNav(null);
@@ -48,7 +47,9 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    navigate("/login");
+    navigate("/");
+    //refresh the page to reset state
+    window.location.reload();
   };
 
   useEffect(() => {
@@ -107,15 +108,18 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
                 icon={<FiSun />}
                 checkedIcon={<FiMoon />}
               />
+
               <IconButton onClick={toggleCart}>
                 <Badge badgeContent={0} color="primary">
                   <FiShoppingCart />
                 </Badge>
               </IconButton>
+
+              {/* Avatar & Menu (Always shown) */}
               <Tooltip title="Account">
                 <IconButton onClick={handleOpenUserMenu}>
                   <Avatar
-                    alt={user?.fullName}
+                    alt={user?.fullName || "Guest"}
                     src={
                       user?.profileImage
                         ? `http://127.0.0.1:5003/${user.profileImage.replace(/\\/g, "/")}`
@@ -124,29 +128,33 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
                   />
                 </IconButton>
               </Tooltip>
+
               <Menu
                 anchorEl={anchorElUser}
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
               >
-                {user ? (
-                  <>
-                    <MenuItem disabled>
-                      <Typography textAlign="center">{user.fullName}</Typography>
+                {!user ? (
+                  [
+                    <MenuItem key="login" onClick={() => { navigate("/login"); handleCloseUserMenu(); }}>
+                      <Typography textAlign="center">Login</Typography>
+                    </MenuItem>,
+                    <MenuItem key="register" onClick={() => { navigate("/register"); handleCloseUserMenu(); }}>
+                      <Typography textAlign="center">Register</Typography>
                     </MenuItem>
-                    <MenuItem onClick={() => navigate("/profile")}>
-                      <Typography textAlign="center">My Profile</Typography>
-                    </MenuItem>
-                    <MenuItem onClick={handleLogout}>
-                      <Typography textAlign="center" color="error">
-                        Sign Out
-                      </Typography>
-                    </MenuItem>
-                  </>
+                  ]
                 ) : (
-                  <MenuItem disabled>
-                    <Typography textAlign="center">Sign In</Typography>
-                  </MenuItem>
+                  [
+                    <MenuItem key="name" disabled>
+                      <Typography textAlign="center">{user.fullName}</Typography>
+                    </MenuItem>,
+                    <MenuItem key="profile" onClick={() => { navigate("/profile"); handleCloseUserMenu(); }}>
+                      <Typography textAlign="center">My Profile</Typography>
+                    </MenuItem>,
+                    <MenuItem key="logout" onClick={() => { handleLogout(); handleCloseUserMenu(); }}>
+                      <Typography textAlign="center" color="error">Sign Out</Typography>
+                    </MenuItem>
+                  ]
                 )}
               </Menu>
 
@@ -160,6 +168,7 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
         </Container>
       </StyledAppBar>
 
+      {/* Mobile Menu */}
       <Menu anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={handleCloseNavMenu}>
         {pages.map((page) => (
           <MenuItem
@@ -173,6 +182,16 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
           </MenuItem>
         ))}
 
+        {!user && (
+          <>
+            <MenuItem onClick={() => { navigate("/login"); handleCloseNavMenu(); }}>
+              <Typography textAlign="center">Login</Typography>
+            </MenuItem>
+            <MenuItem onClick={() => { navigate("/register"); handleCloseNavMenu(); }}>
+              <Typography textAlign="center">Register</Typography>
+            </MenuItem>
+          </>
+        )}
       </Menu>
     </>
   );

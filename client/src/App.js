@@ -13,17 +13,18 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* Layout with Navbar and Footer */}
+        {/* 🟢 Public pages without layout */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* 🟦 Pages with navbar/footer inside MainLayout */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomeApp />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/products" element={<ProductCard />} />
-
         </Route>
 
-        {/* Dashboard without Navbar/Footer */}
+        {/* 🟣 Dashboard with separate layout */}
         <Route path="/dashboard" element={<DashboardLayoutSlots />} />
 
       </Routes>

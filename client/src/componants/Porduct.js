@@ -43,6 +43,7 @@ const StyledCardActions = styled(CardActions)({
 
 export default function Products() {
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
@@ -50,6 +51,7 @@ export default function Products() {
       const res = await axios.get("http://127.0.0.1:5003/api/products/getallproducts");
       console.log("API full response:", res.data);
       setProducts(res.data || []);
+      setAllProducts(res.data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -60,6 +62,20 @@ export default function Products() {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const handleCategoryChange = (e) => {
+    const value = e.target.value;
+    if (value === "all") {
+      setProducts(allProducts);
+    } else {
+      const filtered = allProducts.filter(
+        (p) => p.prodCategory && p.prodCategory.name === value
+      );
+      setProducts(filtered);
+    }
+  };
+
+  const categories = [...new Set(allProducts.map(p => p.prodCategory?.name))].filter(Boolean);
 
   if (loading) {
     return (
@@ -80,26 +96,15 @@ export default function Products() {
             fontSize: "16px",
             minWidth: "200px",
           }}
-          onChange={e => {
-            const value = e.target.value;
-            if (value === "all") {
-              fetchProducts();
-            } else {
-              setProducts(prev =>
-                prev.filter(p => p.prodCategory && p.prodCategory.name === value)
-              );
-            }
-          }}
+          onChange={handleCategoryChange}
           defaultValue="all"
         >
           <option value="all">All Categories</option>
-          {[...new Set(products.map(p => p.prodCategory?.name))]
-            .filter(Boolean)
-            .map(cat => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
         </select>
       </Box>
 
