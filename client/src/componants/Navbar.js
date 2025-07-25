@@ -1,5 +1,3 @@
-// components/Navbar.js
-
 import React, { useState, useEffect } from "react";
 import {
   AppBar,
@@ -15,32 +13,44 @@ import {
   MenuItem,
   Badge,
   Switch,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import { FiMenu, FiShoppingCart, FiMoon, FiSun } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import {
+  FiMenu,
+  FiShoppingCart,
+  FiMoon,
+  FiSun,
+  FiHome,
+  FiPackage,
+  FiInfo,
+  FiPhone,
+} from "react-icons/fi";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
+const StyledAppBar = styled(AppBar)(() => ({
   background: "#ffffff",
   boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
 }));
 
 export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
-  const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const pages = [
-    { name: "Home", path: "/" },
-    { name: "About Us", path: "/about" },
-    { name: "Products", path: "/products" },
-    { name: "Contact Us", path: "/contact" },
+    { name: "Home", path: "/", icon: <FiHome /> },
+    { name: "Products", path: "/products", icon: <FiPackage /> },
+    { name: "About Us", path: "/about", icon: <FiInfo /> },
+    { name: "Contact Us", path: "/contact", icon: <FiPhone /> },
   ];
 
-  const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
-  const handleCloseNavMenu = () => setAnchorElNav(null);
   const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget);
   const handleCloseUserMenu = () => setAnchorElUser(null);
 
@@ -48,7 +58,6 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     navigate("/");
-    //refresh the page to reset state
     window.location.reload();
   };
 
@@ -70,129 +79,110 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
   }, []);
 
   return (
-    <>
-      <StyledAppBar position="static">
-        <Container maxWidth="xl">
-          <Toolbar disableGutters sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography variant="h6" noWrap sx={{ color: "#000000", cursor: "pointer" }} onClick={() => navigate("/")}>
-              LOGO
-            </Typography>
-
-            <Box
-              sx={{
-                display: { xs: "none", md: "flex" },
-                justifyContent: "center",
-                flexGrow: 1,
-                gap: 2,
-              }}
+    <StyledAppBar position="static">
+      <Container maxWidth="xl">
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          {/* Left: Logo */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography
+              variant="h6"
+              noWrap
+              sx={{ color: "#1976d2", fontWeight: 700, cursor: "pointer" }}
+              onClick={() => navigate("/")}
             >
-              {pages.map((page) => (
-                <Button
-                  key={page.name}
-                  onClick={() => navigate(page.path)}
-                  sx={{
-                    color: "#000000",
-                    fontWeight: "500",
-                    "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
-                  }}
-                >
-                  {page.name}
-                </Button>
-              ))}
+              Talafha
+            </Typography>
+          </Box>
+
+          {/* Center: Navigation */}
+          {!isMobile && (
+            <Box sx={{ display: "flex", gap: 2 }}>
+              {pages.map((page) => {
+                const isActive = location.pathname === page.path;
+                return (
+                  <Button
+                    key={page.name}
+                    onClick={() => navigate(page.path)}
+                    sx={{
+                      color: isActive ? "#1976d2" : "#000000",
+                      fontWeight: 500,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      borderBottom: isActive ? "2px solid #1976d2" : "none",
+                      borderRadius: 0,
+                      "&:hover": {
+                        backgroundColor: "rgba(0,0,0,0.04)",
+                      },
+                    }}
+                  >
+                    <Box component="span">{page.icon}</Box>
+                    {page.name}
+                  </Button>
+                );
+              })}
             </Box>
+          )}
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Switch
-                checked={darkMode}
-                onChange={toggleDarkMode}
-                icon={<FiSun />}
-                checkedIcon={<FiMoon />}
-              />
+          {/* Right: Dark mode, Cart, Profile */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Switch
+              checked={darkMode}
+              onChange={toggleDarkMode}
+              icon={<FiSun />}
+              checkedIcon={<FiMoon />}
+            />
 
-              <IconButton onClick={toggleCart}>
-                <Badge badgeContent={0} color="primary">
-                  <FiShoppingCart />
-                </Badge>
+            <IconButton onClick={toggleCart}>
+              <Badge badgeContent={0} color="primary">
+                <FiShoppingCart />
+              </Badge>
+            </IconButton>
+
+            <Tooltip title="Account">
+              <IconButton onClick={handleOpenUserMenu}>
+                <Avatar
+                  alt={user?.fullName || "Guest"}
+                  src={
+                    user?.profileImage
+                      ? `http://127.0.0.1:5003/${user.profileImage.replace(/\\/g, "/")}`
+                      : ""
+                  }
+                />
               </IconButton>
+            </Tooltip>
 
-              {/* Avatar & Menu (Always shown) */}
-              <Tooltip title="Account">
-                <IconButton onClick={handleOpenUserMenu}>
-                  <Avatar
-                    alt={user?.fullName || "Guest"}
-                    src={
-                      user?.profileImage
-                        ? `http://127.0.0.1:5003/${user.profileImage.replace(/\\/g, "/")}`
-                        : ""
-                    }
-                  />
-                </IconButton>
-              </Tooltip>
-
-              <Menu
-                anchorEl={anchorElUser}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-              >
-                {!user ? (
-                  [
-                    <MenuItem key="login" onClick={() => { navigate("/login"); handleCloseUserMenu(); }}>
-                      <Typography textAlign="center">Login</Typography>
-                    </MenuItem>,
-                    <MenuItem key="register" onClick={() => { navigate("/register"); handleCloseUserMenu(); }}>
-                      <Typography textAlign="center">Register</Typography>
-                    </MenuItem>
-                  ]
-                ) : (
-                  [
-                    <MenuItem key="name" disabled>
-                      <Typography textAlign="center">{user.fullName}</Typography>
-                    </MenuItem>,
-                    <MenuItem key="profile" onClick={() => { navigate("/profile"); handleCloseUserMenu(); }}>
-                      <Typography textAlign="center">My Profile</Typography>
-                    </MenuItem>,
-                    <MenuItem key="logout" onClick={() => { handleLogout(); handleCloseUserMenu(); }}>
-                      <Typography textAlign="center" color="error">Sign Out</Typography>
-                    </MenuItem>
-                  ]
-                )}
-              </Menu>
-
-              <Box sx={{ display: { xs: "flex", md: "none" } }}>
-                <IconButton size="large" onClick={handleOpenNavMenu} color="inherit">
-                  <FiMenu />
-                </IconButton>
-              </Box>
-            </Box>
-          </Toolbar>
-        </Container>
-      </StyledAppBar>
-
-      {/* Mobile Menu */}
-      <Menu anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={handleCloseNavMenu}>
-        {pages.map((page) => (
-          <MenuItem
-            key={page.name}
-            onClick={() => {
-              navigate(page.path);
-              handleCloseNavMenu();
-            }}
-          >
-            <Typography textAlign="center">{page.name}</Typography>
-          </MenuItem>
-        ))}
-
-        {!user && (
-          <>
-            <MenuItem onClick={() => { navigate("/login"); handleCloseNavMenu(); }}>
-              <Typography textAlign="center">Login</Typography>
-            </MenuItem>
-            <MenuItem onClick={() => { navigate("/register"); handleCloseNavMenu(); }}>
-              <Typography textAlign="center">Register</Typography>
-            </MenuItem>
-          </>
-        )}
-      </Menu>
-    </>
+            <Menu
+              anchorEl={anchorElUser}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              {!user ? (
+                <>
+                  <MenuItem onClick={() => { navigate("/login"); handleCloseUserMenu(); }}>
+                    <Typography textAlign="center">Login</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => { navigate("/register"); handleCloseUserMenu(); }}>
+                    <Typography textAlign="center">Register</Typography>
+                  </MenuItem>
+                </>
+              ) : (
+                <>
+                  <MenuItem disabled>
+                    <Typography textAlign="center">{user.fullName}</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => { navigate("/profile"); handleCloseUserMenu(); }}>
+                    <Typography textAlign="center">My Profile</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => { handleLogout(); handleCloseUserMenu(); }}>
+                    <Typography textAlign="center" color="error">Sign Out</Typography>
+                  </MenuItem>
+                </>
+              )}
+            </Menu>
+          </Box>
+        </Toolbar>
+      </Container>
+    </StyledAppBar>
   );
 }
