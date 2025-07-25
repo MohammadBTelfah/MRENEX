@@ -17,6 +17,7 @@ function App() {
         {/* 🟢 Public pages without layout */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        
 
         {/* 🟦 Pages with navbar/footer inside MainLayout */}
         <Route element={<MainLayout />}>
@@ -24,6 +25,7 @@ function App() {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/products" element={<ProductCard />} />
           <Route path="/cart" element={<Cart />} />
+
         </Route>
 
         {/* 🟣 Dashboard with separate layout */}
