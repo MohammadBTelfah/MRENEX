@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productsRoutes');
 const categoryRoutes = require('./routes/categoryRouters');
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 //  import and user cors
 const cors = require('cors');
@@ -22,6 +24,8 @@ app.use('/uploads', express.static('uploads')); // Serve static profile images
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
