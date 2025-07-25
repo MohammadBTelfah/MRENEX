@@ -159,12 +159,20 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
             >
               {!user ? (
                 <>
-                  <MenuItem onClick={() => { navigate("/login"); handleCloseUserMenu(); }}>
-                    <Typography textAlign="center">Login</Typography>
-                  </MenuItem>
-                  <MenuItem onClick={() => { navigate("/register"); handleCloseUserMenu(); }}>
-                    <Typography textAlign="center">Register</Typography>
-                  </MenuItem>
+                 <MenuItem onClick={() => {
+  handleCloseUserMenu();
+  setTimeout(() => navigate("/login"), 50);
+}}>
+  <Typography textAlign="center">Login</Typography>
+</MenuItem>
+
+<MenuItem onClick={() => {
+  handleCloseUserMenu();
+  setTimeout(() => navigate("/register"), 50);
+}}>
+  <Typography textAlign="center">Register</Typography>
+</MenuItem>
+
                 </>
               ) : (
                 <>
