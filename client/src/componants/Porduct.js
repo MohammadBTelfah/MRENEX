@@ -58,6 +58,19 @@ export default function Products() {
       setLoading(false);
     }
   };
+  const addToCart = (productId) => {
+    console.log("Adding to cart:", productId);
+     axios.post("http://127.0.0.1:5003/api/cart/add-to-cart",{productId,quantity:1},{
+              headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+        }).then(()=>{
+            alert("added to cart")
+        }).catch(err=>{
+            alert(err)
+        })
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -144,7 +157,7 @@ export default function Products() {
                       </Typography>
                     </CardContent>
                     <StyledCardActions>
-                      <Button
+                      <Button onClick={() => addToCart(product._id)}
                         variant="contained"
                         size="small"
                         startIcon={<ShoppingCartIcon />}
