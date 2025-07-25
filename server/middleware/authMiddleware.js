@@ -8,10 +8,10 @@ const auth = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Decoded token:", decoded);
 
-    req.user = {
-      id: decoded.id,
-      role: decoded.role
-    };
+req.user = {
+  _id: decoded.id, // بهذا الشكل تتوافق مع الكود الحالي
+  role: decoded.role
+};
 
     next();
   } catch (err) {

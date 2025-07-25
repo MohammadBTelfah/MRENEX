@@ -13,9 +13,9 @@ import {
   CardActions,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-// Styled Card
+// Styled components
 const StyledCard = styled(Card)({
   height: "100%",
   display: "flex",
@@ -28,13 +28,11 @@ const StyledCard = styled(Card)({
   },
 });
 
-// Image styling (larger)
 const StyledMedia = styled(CardMedia)({
   height: 250,
   objectFit: "cover",
 });
 
-// Buttons spacing
 const StyledCardActions = styled(CardActions)({
   display: "flex",
   justifyContent: "space-between",
@@ -49,7 +47,6 @@ export default function Products() {
   const fetchProducts = async () => {
     try {
       const res = await axios.get("http://127.0.0.1:5003/api/products/getallproducts");
-      console.log("API full response:", res.data);
       setProducts(res.data || []);
       setAllProducts(res.data || []);
     } catch (error) {
@@ -58,18 +55,22 @@ export default function Products() {
       setLoading(false);
     }
   };
+
   const addToCart = (productId) => {
-    console.log("Adding to cart:", productId);
-     axios.post("http://127.0.0.1:5003/api/cart/add-to-cart",{productId,quantity:1},{
-              headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-        }).then(()=>{
-            alert("added to cart")
-        }).catch(err=>{
-            alert(err)
-        })
+    axios.post("http://127.0.0.1:5003/api/cart/add-to-cart", {
+      productId,
+      quantity: 1,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    }).then(() => {
+      alert("Added to cart");
+      if (window.updateCartCount) window.updateCartCount(); // ✅ تحديث العداد
+    }).catch(err => {
+      alert(err.message);
+    });
   };
 
   useEffect(() => {

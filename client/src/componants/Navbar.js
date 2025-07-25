@@ -1,3 +1,4 @@
+// Navbar.jsx (with real-time cart count updates)
 import React, { useState, useEffect } from "react";
 import {
   AppBar,
@@ -35,12 +36,13 @@ const StyledAppBar = styled(AppBar)(() => ({
   boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
 }));
 
-export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
+export default function Navbar({ darkMode, toggleDarkMode }) {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [user, setUser] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
+
   const navigate = useNavigate();
   const location = useLocation();
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -61,6 +63,22 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
     window.location.reload();
   };
 
+  const fetchCartCount = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:5003/api/cart/get-cart", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const items = res.data?.items || [];
+      const totalCount = items.reduce((sum, item) => sum + item.quantity, 0);
+      setCartCount(totalCount);
+    } catch (err) {
+      console.error("Error fetching cart count:", err);
+      setCartCount(0);
+    }
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -70,6 +88,7 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
           },
         });
         setUser(res.data);
+        fetchCartCount();
       } catch (err) {
         console.error("Error fetching user profile", err);
         setUser(null);
@@ -78,11 +97,14 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    window.updateCartCount = fetchCartCount;
+  }, [cartCount]);
+
   return (
     <StyledAppBar position="static">
       <Container maxWidth="xl">
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          {/* Left: Logo */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Typography
               variant="h6"
@@ -94,7 +116,6 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
             </Typography>
           </Box>
 
-          {/* Center: Navigation */}
           {!isMobile && (
             <Box sx={{ display: "flex", gap: 2 }}>
               {pages.map((page) => {
@@ -124,7 +145,6 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
             </Box>
           )}
 
-          {/* Right: Dark mode, Cart, Profile */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Switch
               checked={darkMode}
@@ -133,8 +153,8 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
               checkedIcon={<FiMoon />}
             />
 
-            <IconButton onClick={toggleCart}>
-              <Badge badgeContent={0} color="primary">
+            <IconButton onClick={() => navigate("/cart")}> 
+              <Badge badgeContent={cartCount} color="primary">
                 <FiShoppingCart />
               </Badge>
             </IconButton>
@@ -159,20 +179,12 @@ export default function Navbar({ darkMode, toggleDarkMode, toggleCart }) {
             >
               {!user ? (
                 <>
-                 <MenuItem onClick={() => {
-  handleCloseUserMenu();
-  setTimeout(() => navigate("/login"), 50);
-}}>
-  <Typography textAlign="center">Login</Typography>
-</MenuItem>
-
-<MenuItem onClick={() => {
-  handleCloseUserMenu();
-  setTimeout(() => navigate("/register"), 50);
-}}>
-  <Typography textAlign="center">Register</Typography>
-</MenuItem>
-
+                  <MenuItem onClick={() => { handleCloseUserMenu(); setTimeout(() => navigate("/login"), 50); }}>
+                    <Typography textAlign="center">Login</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => { handleCloseUserMenu(); setTimeout(() => navigate("/register"), 50); }}>
+                    <Typography textAlign="center">Register</Typography>
+                  </MenuItem>
                 </>
               ) : (
                 <>

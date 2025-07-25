@@ -7,6 +7,7 @@ import HomeApp from './componants/Home';
 import UserProfile from './componants/UserProfile';
 import ProductCard from './componants/Porduct';
 import MainLayout from './componants/MainLayout';
+import Cart from './componants/itemcart';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/" element={<HomeApp />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/products" element={<ProductCard />} />
+          <Route path="/cart" element={<Cart />} />
         </Route>
 
         {/* 🟣 Dashboard with separate layout */}
