@@ -97,8 +97,8 @@ const CartPage = () => {
     return cartItems.reduce((total, item) => total + item.product.prodPrice * item.quantity, 0);
   };
 
-  const tax = calculateTotal() * 0.1;
-  const shipping = cartItems.length > 0 ? 15.99 : 0;
+  const tax = calculateTotal() * 0;
+  const shipping = cartItems.length > 0 ? 0 : 0;
   const grandTotal = calculateTotal() + tax + shipping;
 
   useEffect(() => {
@@ -152,7 +152,7 @@ const CartPage = () => {
                 <Typography>${calculateTotal().toFixed(2)}</Typography>
               </Box>
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                <Typography>Tax (10%)</Typography>
+                <Typography>Tax (0%)</Typography>
                 <Typography>${tax.toFixed(2)}</Typography>
               </Box>
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
