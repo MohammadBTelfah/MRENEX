@@ -1,4 +1,4 @@
-// Updated CartPage.jsx with API Integration
+// Updated CartPage.jsx with Snackbar & Key Fix
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -16,7 +16,9 @@ import {
   Grid,
   IconButton,
   Typography,
-  styled
+  styled,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import { FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
 import { BsCartX } from "react-icons/bs";
@@ -41,6 +43,8 @@ const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [snackbarKey, setSnackbarKey] = useState(0); // 🆕
 
   const fetchCart = async () => {
     try {
@@ -105,6 +109,29 @@ const CartPage = () => {
     fetchCart();
   }, []);
 
+  const PlaceOrder = async () => {
+    try {
+      const response = await axios.post("http://127.0.0.1:5003/api/orders/place-order", {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      console.log("Order placed successfully:", response.data);
+      setCartItems([]);
+      if (window.updateCartCount) window.updateCartCount();
+
+      // ✅ Snackbar trigger with key
+      setSuccessOpen(false);
+      setSnackbarKey(prev => prev + 1);
+      setSuccessOpen(true);
+
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("Something went wrong while placing the order. Please try again.");
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom fontWeight="bold">
@@ -163,7 +190,7 @@ const CartPage = () => {
                 <Typography variant="h6">Total</Typography>
                 <Typography variant="h6" color="primary">${grandTotal.toFixed(2)}</Typography>
               </Box>
-              <Button variant="contained" color="primary" fullWidth size="large" sx={{ mt: 2 }}>
+              <Button onClick={PlaceOrder} variant="contained" color="primary" fullWidth size="large" sx={{ mt: 2 }}>
                 Proceed to Checkout
               </Button>
             </Card>
@@ -181,6 +208,24 @@ const CartPage = () => {
           <Button onClick={confirmDelete} color="error" autoFocus>Remove</Button>
         </DialogActions>
       </Dialog>
+
+      {/* ✅ Snackbar component */}
+      <Snackbar
+        key={snackbarKey}
+        open={successOpen}
+        autoHideDuration={4000}
+        onClose={() => setSuccessOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSuccessOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          ✅ Order placed successfully!
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

@@ -194,9 +194,13 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
                   <MenuItem onClick={() => { navigate("/profile"); handleCloseUserMenu(); }}>
                     <Typography textAlign="center">My Profile</Typography>
                   </MenuItem>
+                   <MenuItem onClick={() => { navigate("/order-history"); handleCloseUserMenu(); }}>
+                    <Typography textAlign="center">Order History</Typography>
+                  </MenuItem>
                   <MenuItem onClick={() => { handleLogout(); handleCloseUserMenu(); }}>
                     <Typography textAlign="center" color="error">Sign Out</Typography>
                   </MenuItem>
+                 
                 </>
               )}
             </Menu>

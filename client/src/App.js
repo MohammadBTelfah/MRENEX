@@ -8,6 +8,7 @@ import UserProfile from './componants/UserProfile';
 import ProductCard from './componants/Porduct';
 import MainLayout from './componants/MainLayout';
 import Cart from './componants/itemcart';
+import OrderHistory from './componants/OrderHistory';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/products" element={<ProductCard />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/order-history" element={<OrderHistory />} />
 
         </Route>
 
