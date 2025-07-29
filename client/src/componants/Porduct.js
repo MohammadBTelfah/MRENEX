@@ -11,6 +11,8 @@ import {
   Container,
   Button,
   CardActions,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -43,6 +45,7 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const fetchProducts = async () => {
     try {
@@ -66,8 +69,8 @@ export default function Products() {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     }).then(() => {
-      alert("Added to cart");
-      if (window.updateCartCount) window.updateCartCount(); // ✅ تحديث العداد
+      setSnackbarOpen(true); // ✅ Show snackbar
+      if (window.updateCartCount) window.updateCartCount();
     }).catch(err => {
       alert(err.message);
     });
@@ -87,6 +90,10 @@ export default function Products() {
       );
       setProducts(filtered);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   const categories = [...new Set(allProducts.map(p => p.prodCategory?.name))].filter(Boolean);
@@ -187,6 +194,18 @@ export default function Products() {
           </Grid>
         )}
       </Container>
+
+      {/* ✅ Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success" variant="filled" sx={{ width: "100%" }}>
+          Added to cart successfully!
+        </Alert>
+      </Snackbar>
     </>
   );
 }
