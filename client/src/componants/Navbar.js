@@ -306,7 +306,7 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
                   <ListItem key={item.product._id} alignItems="flex-start" sx={{ py: 1 }}>
                     <ListItemAvatar>
                       <MUIAvatar
-                        src={`http://127.0.0.1:5003/${item.product.prodImage?.replace(/\\/g, "/")}`}
+                        src={`http://127.0.0.1:5003/${item.product.prodImage}`}
                         variant="square"
                       />
                     </ListItemAvatar>

@@ -48,11 +48,14 @@ exports.updateCategory = async (req, res) => {
     }
 // Delete a category by ID
 exports.deleteCategory = async (req, res) => {
-    try {
-        const deletedCategory = await Category.findByIdAndDelete(req.params.id);
-        if (!deletedCategory) return res.status(404).json({ message: 'Category not found' });
-        res.status(200).json({ message: 'Category deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error deleting category', error: error.message });
+  try {
+    const { id } = req.params;
+    const category = await Category.findOneAndDelete({ _id: id }); // 🔁 بدل FindByIdAndDelete
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
     }
-    }
+    res.status(200).json({ message: 'Category deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting category', error: err.message });
+  }
+};
